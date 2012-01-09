@@ -58,7 +58,7 @@ class GameScreen:
         #clockSurfaceObj = getSurfaceFromIcons(4,1)
         #tapSurfaceObj = getSurfaceFromIcons(5,0)
         #tapSplashSurfaceObj = getSurfaceFromIcons(5,1)
-        
+        self.sandyShotSurfObj = self.getSurfaceFromIcons(3,1)
         self.skullSurfaceObj = self.getSurfaceFromIcons(4,0)
         self.dirtSurfaceObj = self.getSurfaceFromIcons(0,2)
         self.brickSurfaceObj = self.getSurfaceFromIcons(0,3)
@@ -76,9 +76,22 @@ class GameScreen:
         
     def render(self):
         self.drawScene()
-
+        self.drawObjects()
+        
         self.animate()
         
+        self.drawPlayer()
+        self.displayScore()
+    
+    def drawObjects(self):
+        for s in self.g.spriteList:
+            if s.dir == 1:
+                self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect)
+            else:
+                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect)
+            
+            
+    def drawPlayer(self):
         p = self.g.player
         if p.isShooting:
             if p.dir == -1:
@@ -89,13 +102,13 @@ class GameScreen:
             if self.playerShootFrame == 1 and self.playerAnimationCounter % 5 == 0:
                 self.soundPlayerShoot.stop()
                 self.soundPlayerShoot.play()
+                self.g.spawnShot(p.rect.copy(), p.dir)
 
         else:                
-            if p.dir==-1:
+            if p.dir == -1:
                 self.windowSurfaceObj.blit(self.sandyWalkSurfObj[self.playerFrame], p.rect)
             else:
                 self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyWalkSurfObj[self.playerFrame],True,False), p.rect)
-        self.displayScore()
 
     def drawScene(self):
         # fill background

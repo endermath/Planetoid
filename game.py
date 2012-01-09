@@ -2,13 +2,15 @@ import sys
 import pygame
 from pygame.locals import *
 
+from global_stuff import *
+
 from player import Player
+from playershot import PlayerShot
 from room import Room
 
 class Game:
     def __init__(self):                
         self.isGameOver=False
-
         self.player = Player()
         
         self.currentRoom = Room(["1111111111111111",
@@ -27,6 +29,8 @@ class Game:
                             "1000000000111111",
                             "1000000000000001",
                             "3333333111333333"])
+        
+        self.spriteList = []
                             
         #self.flowers = []
         #self.flowers.append(Flower(random.randint(1,screenSize-2)))
@@ -37,9 +41,16 @@ class Game:
         #self.fallSpawnCounter = 60   #delay until next falling item is created
         #self.wateringCounter = 0            #for animating the splashing of water when watering or refilling
 
-
+    def spawnShot(self, rect, dir):
+        self.spriteList.append(PlayerShot(rect,dir))
+        
+        
     def updateObjects(self):
-        pass
+        for s in self.spriteList:
+            s.tick()
+            if s.rect.right < 0 or s.rect.left>SCREEN_WIDTH:
+                self.spriteList.remove(s)
+                
         # falling items
         #for f in self.fallingItems:
         #    if not f.fallAndDecideIfTimeToRemove():
