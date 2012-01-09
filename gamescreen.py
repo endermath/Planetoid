@@ -75,29 +75,41 @@ class GameScreen:
 
         
     def render(self):
-        self.drawScene()
-        self.drawObjects()
+        offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
+        offsety = SCREEN_HEIGHT/2 - self.g.player.rect.centery
+        #want to require that
+        #0 >= xoffs >= SCREEN_WIDTH - self.g.currentRoom.width
+        #0 >= yoffs >= SCREEN_HEIGHT - self.g.currentRoom.height
+        offsetx = min(offsetx, 0)
+        offsetx = max(SCREEN_WIDTH - self.g.currentRoom.width, offsetx)
+        
+        offsety = min(offsety, 0)
+        offsety = max(SCREEN_HEIGHT -self.g.currentRoom.height, offsety)
+        
+        self.offset = (offsetx, offsety)
         
         self.animate()
-        
+
+        self.drawScene()
+        self.drawObjects()
         self.drawPlayer()
+
         self.displayScore()
     
     def drawObjects(self):
         for s in self.g.spriteList:
             if s.dir == 1:
-                self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect)
+                self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect.move(self.offset))
             else:
-                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect)
-            
-            
+                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect.move(self.offset))
+                    
     def drawPlayer(self):
         p = self.g.player
         if p.isShooting:
             if p.dir == -1:
-                self.windowSurfaceObj.blit(self.sandyShootSurfObj[self.playerShootFrame], p.rect)
+                self.windowSurfaceObj.blit(self.sandyShootSurfObj[self.playerShootFrame], p.rect.move(self.offset))
             else:
-                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShootSurfObj[self.playerShootFrame],True,False), p.rect)
+                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShootSurfObj[self.playerShootFrame],True,False), p.rect.move(self.offset))
 
             if self.playerShootFrame == 1 and self.playerAnimationCounter % 5 == 0:
                 self.soundPlayerShoot.stop()
@@ -106,9 +118,9 @@ class GameScreen:
 
         else:                
             if p.dir == -1:
-                self.windowSurfaceObj.blit(self.sandyWalkSurfObj[self.playerFrame], p.rect)
+                self.windowSurfaceObj.blit(self.sandyWalkSurfObj[self.playerFrame], p.rect.move(self.offset))
             else:
-                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyWalkSurfObj[self.playerFrame],True,False), p.rect)
+                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyWalkSurfObj[self.playerFrame],True,False), p.rect.move(self.offset))
 
     def drawScene(self):
         # fill background
@@ -118,14 +130,17 @@ class GameScreen:
 
         #if outside, draw tap and update falling items
         #if isOutside:
-        for y in range(0,16):
-            for x in range(0,16):
+        for y in range(0,len(self.g.currentRoom)):
+            for x in range(0,len(self.g.currentRoom[0])):
+                rect = pygame.Rect((x*ICON_SIZE,y*ICON_SIZE), (ICON_SIZE,ICON_SIZE)).move(self.offset)
+                if rect.bottom<0 or rect.top >= SCREEN_HEIGHT or rect.left >= SCREEN_WIDTH or rect.right < 0:
+                    continue
                 if self.g.currentRoom[y][x] == "1":
-                    self.windowSurfaceObj.blit(self.brickSurfaceObj, (x*ICON_SIZE,y*ICON_SIZE))
+                    self.windowSurfaceObj.blit(self.brickSurfaceObj, rect)
                 if self.g.currentRoom[y][x] == "2":
-                    self.windowSurfaceObj.blit(self.skullSurfaceObj, (x*ICON_SIZE,y*ICON_SIZE))
+                    self.windowSurfaceObj.blit(self.skullSurfaceObj, rect)
                 if self.g.currentRoom[y][x] == "3":
-                    self.windowSurfaceObj.blit(self.dirtSurfaceObj, (x*ICON_SIZE,y*ICON_SIZE))
+                    self.windowSurfaceObj.blit(self.dirtSurfaceObj, rect)
 
             #drawIcon(tapSurfaceObj, 16-2,16-3)
             #for f in self.fallingItems:
