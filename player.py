@@ -10,8 +10,8 @@ class Player:
     isShooting = False  #true when shooting
     score = 0
     
-    def __init__(self):
-        self.rect = pygame.Rect(ICON_SIZE*4,SCREEN_HEIGHT-ICON_SIZE*2,ICON_SIZE,ICON_SIZE)
+    def __init__(self, pos):
+        self.rect = pygame.Rect(pos, (ICON_SIZE,ICON_SIZE))
         self.xspeed = 0
         self.yspeed = 0
         self.movingRight = False
@@ -19,6 +19,9 @@ class Player:
         self.isWalking = False
         self.isFalling = False
     
+        self.health = 100
+        
+        
     def addScore(self,sc):
         self.score +=  sc 
     
@@ -70,7 +73,7 @@ class Player:
             dt = 1 if dy>0 else -1
             while abs(t) <= abs(dy):
                 if not room.canObjectBePlacedAt(curx + dx, cury + t):
-                    self.yspeed = 0
+                    self.yspeed = self.yspeed/2
                     break
                 t += dt
             dy = t - dt
@@ -132,4 +135,7 @@ class Player:
         if self.isFalling:
             return              #can't jump in the air!
         self.yspeed = - 20.0 * ICON_SIZE/FPS
+        
+    def hit(self):
+        self.health -= 1
         

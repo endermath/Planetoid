@@ -5,6 +5,7 @@ from global_stuff import *
 from game import Game
 from player import Player
 from fontrenderer import FontRenderer
+from insectoid import Insectoid
 
 class GameScreen:
     
@@ -18,7 +19,6 @@ class GameScreen:
         
         # Load sound effects
         self.soundPlayerShoot = pygame.mixer.Sound('playershoot.wav')
-
 
         self.playerFrame = 0
         self.playerShootFrame = 0
@@ -46,18 +46,11 @@ class GameScreen:
         self.sandyShootSurfObj.append(pygame.transform.scale(pygame.image.load('sandy2.png'),(ICON_SIZE,ICON_SIZE)))
         self.sandyShootSurfObj.append(pygame.transform.scale(pygame.image.load('sandy3.png'),(ICON_SIZE,ICON_SIZE)))
         
+        self.insectoidSurfObj = [self.getSurfaceFromIcons(0,0),
+                                 self.getSurfaceFromIcons(1,0),
+                                 self.getSurfaceFromIcons(2,0)]
         
-                
         
-        
-        #wateringCanSurfaceObj = getSurfaceFromIcons(0,0)
-        #waterSplashSurfaceObj = getSurfaceFromIcons(1,0)
-        #flowerSurfaceObj = getSurfaceFromIcons(2,0)
-        ##flowerstalkSurfaceObj = getSurfaceFromIcons(2,1)
-        #pelletSurfaceObj = getSurfaceFromIcons(3,0)
-        #clockSurfaceObj = getSurfaceFromIcons(4,1)
-        #tapSurfaceObj = getSurfaceFromIcons(5,0)
-        #tapSplashSurfaceObj = getSurfaceFromIcons(5,1)
         self.sandyShotSurfObj = self.getSurfaceFromIcons(3,1)
         self.skullSurfaceObj = self.getSurfaceFromIcons(4,0)
         self.dirtSurfaceObj = self.getSurfaceFromIcons(0,2)
@@ -73,6 +66,9 @@ class GameScreen:
         if (self.playerAnimationCounter % 5 == 0):
             self.playerShootFrame = 1- self.playerShootFrame
 
+        for i in self.g.currentRoom.insectoidList:
+            i.animCounter = (i.animCounter + 1) % 60
+            i.frameNumber = (i.animCounter % 12 ) /4
         
     def render(self):
         offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
@@ -102,7 +98,11 @@ class GameScreen:
                 self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect.move(self.offset))
             else:
                 self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect.move(self.offset))
-                    
+        
+        for i in self.g.currentRoom.insectoidList:
+            self.windowSurfaceObj.blit(self.insectoidSurfObj[i.frameNumber], i.rect.move(self.offset))
+            
+            
     def drawPlayer(self):
         p = self.g.player
         if p.isShooting:
@@ -174,24 +174,21 @@ class GameScreen:
 
     def displayScore(self):
         pass
-        #
-        #charSize = 16
-        ##print score etc at top of screen
-        #self.windowSurfaceObj.fill(pygame.Color(0,0,0),Rect(0,0,16*ICON_SIZE,2*ICON_SIZE))
-        #
-        ##print score
-        #scoreTextx = ((16*ICON_SIZE/2)-5*charSize)/2
-        #scoreTexty = 0 
-        #self.myFontRenderer.render(self.windowSurfaceObj,(scoreTextx,scoreTexty),"SCORE")
-        #
-        ##global scoreBlinkCounter 
-        ##scoreBlinkCounter = scoreBlinkCounter + 1 % FPS
-        #if True: #scoreMultiplier==1 or scoreBlinkCounter> FPS/2:
-        #    self.myFontRenderer.render(self.windowSurfaceObj,(scoreTextx-2*charSize,scoreTexty),"1*")
-        #    scoreWidth = charSize * len(str(self.player.score))
-        #    scorex = ((16*ICON_SIZE/2)-scoreWidth)/2
-        #    scorey = scoreTexty+charSize
-        #    self.myFontRenderer.render(self.windowSurfaceObj,(scorex,scorey),str(self.player.score))
+        
+        charSize = 16
+        #print health at top of screen
+        self.windowSurfaceObj.fill(pygame.Color(0,0,0),Rect(0,0,16*ICON_SIZE, ICON_SIZE))
+        
+        #print health
+        scoreTextx = ((16*ICON_SIZE/2)-6*charSize)/2
+        scoreTexty = 0 
+        self.myFontRenderer.render(self.windowSurfaceObj,(scoreTextx,scoreTexty),"HEALTH")
+        
+        scoreWidth = charSize * len(str(self.g.player.health))
+        scorex = ((16*ICON_SIZE/2)-scoreWidth)/2
+        scorey = scoreTexty+charSize
+        self.myFontRenderer.render(self.windowSurfaceObj,(scorex,scorey),str(self.g.player.health))
+        
         #        
         ##print time left
         ##timeTextx = (16*ICON_SIZE - 4*charSize)/2
