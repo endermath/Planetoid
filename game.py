@@ -8,6 +8,7 @@ from player import Player
 from playershot import PlayerShot
 from room import Room
 from insectoid import Insectoid
+from derpboss import DerpBoss
 
 class Game:
     def __init__(self):                
@@ -73,6 +74,8 @@ class Game:
 
         insectList = [Insectoid((ICON_SIZE*4, ICON_SIZE*35)),
                       Insectoid((ICON_SIZE*12, ICON_SIZE*34))]
+        
+        self.derpBoss = DerpBoss((ICON_SIZE*8,ICON_SIZE*10))
         
         self.currentRoom=Room(self.verticalTop1Room+self.verticalMid1Room * 3+self.verticalBottom1Room,
                               insectList)
@@ -143,7 +146,14 @@ class Game:
                     self.soundInsectoidHit.play()
                     if i.health <= 0:
                         self.currentRoom.insectoidList.remove(i)
-                        
+
+        for s in self.spriteList:    
+            if self.derpBoss.rect.colliderect(s.rect):
+                self.derpBoss.hit()
+                self.soundInsectoidHit.play()
+                #if self.derpBoss.health <= 0:
+                    
+            
     def update(self):    
         self.updateObjects()
         self.player.tick(self.currentRoom)
