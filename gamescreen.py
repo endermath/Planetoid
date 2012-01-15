@@ -6,6 +6,7 @@ from game import Game
 from player import Player
 from fontrenderer import FontRenderer
 from insectoid import Insectoid
+from derpboss import DerpBoss
 
 class GameScreen:
     
@@ -56,6 +57,10 @@ class GameScreen:
         self.dirtSurfaceObj = self.getSurfaceFromIcons(0,2)
         self.brickSurfaceObj = self.getSurfaceFromIcons(0,3)
         
+        self.derpBossSurfObj = []
+        self.derpBossSurfObj.append(pygame.transform.scale(pygame.image.load('derpboss0.png'),(ICON_SIZE*2,ICON_SIZE*2)))
+        self.derpBossSurfObj.append(pygame.transform.scale(pygame.image.load('derpboss1.png'),(ICON_SIZE*2,ICON_SIZE*2)))
+        
     def animate(self):
         self.playerAnimationCounter = (self.playerAnimationCounter + 1) % 60
         if self.g.player.isWalking:
@@ -69,6 +74,9 @@ class GameScreen:
         for i in self.g.currentRoom.insectoidList:
             i.animCounter = (i.animCounter + 1) % 60
             i.frameNumber = (i.animCounter % 12 ) /4
+        
+        self.g.derpBoss.animCounter = (self.g.derpBoss.animCounter + 1) % 60
+        self.g.derpBoss.frameNumber = (self.g.derpBoss.animCounter % 8 ) / 4
         
     def render(self):
         offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
@@ -101,7 +109,8 @@ class GameScreen:
         
         for i in self.g.currentRoom.insectoidList:
             self.windowSurfaceObj.blit(self.insectoidSurfObj[i.frameNumber], i.rect.move(self.offset))
-            
+        
+        self.windowSurfaceObj.blit(self.derpBossSurfObj[self.g.derpBoss.frameNumber], self.g.derpBoss.rect.move(self.offset))
             
     def drawPlayer(self):
         p = self.g.player
