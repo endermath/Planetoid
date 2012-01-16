@@ -80,7 +80,7 @@ class GameScreen:
             i.frameNumber = (i.animCounter % (i.numberOfFrames * 4)) /4
         
         
-    def render(self):
+    def render(self, fpsClock):
         offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
         offsety = SCREEN_HEIGHT/2 - self.g.player.rect.centery
         #want to require that
@@ -100,7 +100,9 @@ class GameScreen:
         self.drawObjects()
         self.drawPlayer()
 
-        self.displayScore()
+        self.displayScore(fpsClock)
+        
+
     
     def drawObjects(self):
         for s in self.g.currentRoom.playerShotList:
@@ -139,8 +141,7 @@ class GameScreen:
     def drawScene(self):
         # fill background
         self.windowSurfaceObj.fill(pygame.Color(25,5,5)) #68,124,209))
-        
-        
+                
 
         #if outside, draw tap and update falling items
         #if isOutside:
@@ -156,37 +157,8 @@ class GameScreen:
                 if self.g.currentRoom[y][x] == "3":
                     self.windowSurfaceObj.blit(self.dirtSurfaceObj, rect)
 
-            #drawIcon(tapSurfaceObj, 16-2,16-3)
-            #for f in self.fallingItems:
-            #    f.draw()
-            #    itemRect = f.get_rect()
-            #    if itemRect.colliderect(self.player.rect):
-            #        f.giveBonus(self.player)
-            #        self.fallingItems.remove(f)
 
-                    
-        #if inside, draw flowers
-        #else:
-        #    # draw bricks and dirt
-        #    for y in range(0,16-1):
-        #        windowSurfaceObj.blit(brickSurfaceObj, (0,y*ICON_SIZE))
-        #        if y<16-3:
-        #            windowSurfaceObj.blit(brickSurfaceObj, ((16-1)*ICON_SIZE,y*ICON_SIZE))
-        #    for x in range(0,16):
-        #        windowSurfaceObj.blit(dirtSurfaceObj, (x*ICON_SIZE, (16-1)*ICON_SIZE))
-        #
-        #    for f in self.flowers:
-        #        f.draw()
-        #    for f in self.fallingFlowers:
-        #        f.draw()
-        #        flowerRect = Rect(int(round(f.xpos)),int(round(f.ypos)),ICON_SIZE,ICON_SIZE)
-        #        if flowerRect.colliderect(self.player.rect):
-        #            f.giveBonus(self.player)
-        #            self.fallingFlowers.remove(f)
-
-
-
-    def displayScore(self):
+    def displayScore(self, fpsClock):
         pass
         
         charSize = 16
@@ -204,15 +176,17 @@ class GameScreen:
         self.myFontRenderer.render(self.windowSurfaceObj,(scorex,scorey),str(self.g.player.health))
         
         #        
-        ##print time left
-        ##timeTextx = (16*ICON_SIZE - 4*charSize)/2
-        ##timeTexty = 0
-        ##myFontRenderer.render(windowSurfaceObj,(timeTextx,timeTexty),"TIME")
-        #
-        ##timeWidth = charSize * len("60")
-        ##timeLeftx = (16*ICON_SIZE-timeWidth)/2
-        ##timeLefty = charSize
-        ##myFontRenderer.render(windowSurfaceObj,(timeLeftx,timeLefty),"60")
+        #print FPS
+        timeTextx = (16*ICON_SIZE - 3*charSize)/2
+        timeTexty = 0
+        self.myFontRenderer.render(self.windowSurfaceObj,(timeTextx,timeTexty),"FPS")
+    
+        ms = fpsClock.tick()
+        FPS = str(int(round(1000.0/ms)))
+        timeWidth = charSize * len(FPS)
+        timeLeftx = (16*ICON_SIZE-timeWidth)/2
+        timeLefty = charSize
+        self.myFontRenderer.render(self.windowSurfaceObj,(timeLeftx,timeLefty),FPS)
         #
         ##print hiscore
         #hiscoreTextx = 16*ICON_SIZE/2 + ((16*ICON_SIZE/2)-7*charSize)/2

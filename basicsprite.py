@@ -56,7 +56,7 @@ class BasicSprite:
             t = 0
             dt = 1 if dx>0 else -1
             while abs(t) <= abs(dx):
-                if not room.canObjectBePlacedAt(curx + t, cury):
+                if not room.canRectBePlacedAt(self.rect.move(t,0)): #, curx + t, cury):
                     self.bumpedWall()
                     break
                 t += dt
@@ -66,7 +66,7 @@ class BasicSprite:
             t = 0
             dt = 1 if dy>0 else -1
             while abs(t) <= abs(dy):
-                if not room.canObjectBePlacedAt(curx + dx, cury + t):
+                if not room.canRectBePlacedAt(self.rect.move(dx,t)): #, curx + dx, cury + t):
                     self.bumpedRoof()
                     break
                 t += dt
@@ -77,7 +77,7 @@ class BasicSprite:
         # Check if we have air under our feet and update isFalling flag accordingly.
         curx = self.rect.left
         cury = self.rect.top        
-        if self.mass == 0 or room.canObjectBePlacedAt(curx, cury+1):
+        if self.mass == 0 or room.canRectBePlacedAt(self.rect.move(0,1)): #, curx, cury+1):
             self.isFalling = True
         else:
             self.isFalling = False

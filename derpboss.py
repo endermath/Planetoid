@@ -11,6 +11,12 @@ class DerpBoss(BasicSprite):
         BasicSprite.__init__(self, r, health=150, mass=2.0, numberOfFrames=2)
         
         self.waitTime = random.randint(300,500)
+    
+    def bumpedWall(self):
+        self.xspeed = - self.xspeed
+    
+    def bumpedRoof(self):
+        self.yspeed = - self.yspeed
         
     def tick(self, room):
         BasicSprite.tick(self, room)

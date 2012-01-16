@@ -15,7 +15,7 @@ fpsClock = pygame.time.Clock()
 pygame.display.set_caption("Planetoid")
 
 # Create a screen
-windowSurfaceObj = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+windowSurfaceObj = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), FULLSCREEN | DOUBLEBUF | HWSURFACE )
 
 pygame.mixer.Sound('background.ogg').play(loops=-1)
 
@@ -141,11 +141,11 @@ while True:
     g = Game()
     gs = GameScreen(g, windowSurfaceObj)
     gs.showTitleScreen()
-    while (not g.isGameOver):
-        g.update()
-        gs.render()
-        pygame.display.update()
-        fpsClock.tick(FPS)
+    while (not g.isGameOver):        
+        g.update() #fpsClock.tick())
+        gs.render(fpsClock)
+        pygame.display.flip() #update()
+        #fpsClock.tick(FPS)
     gs.showGameOverScreen()
     
 

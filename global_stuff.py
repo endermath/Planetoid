@@ -3,8 +3,8 @@ FPS=60            #frames per second
 SCALE_FACTOR=2
 
 ICON_SIZE = 16 * SCALE_FACTOR
-SCREEN_WIDTH = 16 * ICON_SIZE
-SCREEN_HEIGHT = 16 * ICON_SIZE
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 480
 
 def signum(x):
     if x>0:

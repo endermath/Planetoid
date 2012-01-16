@@ -46,8 +46,9 @@ class Player(BasicSprite):
         self.xspeed = -8.0*ICON_SIZE/FPS
         #if self.isFalling:
         #    self.xspeed = self.xspeed * 0.5
-        if not self.isShooting:
-            self.dir = -1
+        
+        #if not self.isShooting:
+        self.dir = -1
         
     def moveRight(self):
         self.isWalking = True
@@ -56,8 +57,10 @@ class Player(BasicSprite):
         self.xspeed = 8.0*ICON_SIZE/FPS
         #if self.isFalling:
         #    self.xspeed = self.xspeed * 0.5
-        if not self.isShooting:
-            self.dir = 1
+        
+        
+        #if not self.isShooting:
+        self.dir = 1
         
     def jump(self):
         if self.isFalling:
