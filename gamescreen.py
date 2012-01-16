@@ -1,3 +1,4 @@
+import random
 import pygame
 from pygame.locals import *
 
@@ -55,7 +56,10 @@ class GameScreen:
         self.sandyShotSurfObj = self.getSurfaceFromIcons(3,1)
         self.skullSurfaceObj = self.getSurfaceFromIcons(4,0)
         self.dirtSurfaceObj = self.getSurfaceFromIcons(0,2)
-        self.brickSurfaceObj = self.getSurfaceFromIcons(0,3)
+        self.brickSurfObjs = []
+        self.brickSurfObjs.append(self.getSurfaceFromIcons(0,5))
+        self.brickSurfObjs.append(self.getSurfaceFromIcons(1,4))
+        
         
         self.derpBossSurfObj = []
         self.derpBossSurfObj.append(pygame.transform.scale(pygame.image.load('derpboss0.png'),(ICON_SIZE*2,ICON_SIZE*2)))
@@ -71,12 +75,10 @@ class GameScreen:
         if (self.playerAnimationCounter % 5 == 0):
             self.playerShootFrame = 1- self.playerShootFrame
 
-        for i in self.g.currentRoom.insectoidList:
+        for i in self.g.currentRoom.monsterList:
             i.animCounter = (i.animCounter + 1) % 60
-            i.frameNumber = (i.animCounter % 12 ) /4
+            i.frameNumber = (i.animCounter % (i.numberOfFrames * 4)) /4
         
-        self.g.derpBoss.animCounter = (self.g.derpBoss.animCounter + 1) % 60
-        self.g.derpBoss.frameNumber = (self.g.derpBoss.animCounter % 8 ) / 4
         
     def render(self):
         offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
@@ -101,16 +103,19 @@ class GameScreen:
         self.displayScore()
     
     def drawObjects(self):
-        for s in self.g.spriteList:
+        for s in self.g.currentRoom.playerShotList:
             if s.dir == 1:
                 self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect.move(self.offset))
             else:
                 self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect.move(self.offset))
         
-        for i in self.g.currentRoom.insectoidList:
-            self.windowSurfaceObj.blit(self.insectoidSurfObj[i.frameNumber], i.rect.move(self.offset))
+        for i in self.g.currentRoom.monsterList:
+            if isinstance(i,Insectoid):
+                self.windowSurfaceObj.blit(self.insectoidSurfObj[i.frameNumber], i.rect.move(self.offset))
+            elif isinstance(i,DerpBoss):
+                self.windowSurfaceObj.blit(self.derpBossSurfObj[i.frameNumber], i.rect.move(self.offset))
+            
         
-        self.windowSurfaceObj.blit(self.derpBossSurfObj[self.g.derpBoss.frameNumber], self.g.derpBoss.rect.move(self.offset))
             
     def drawPlayer(self):
         p = self.g.player
@@ -145,7 +150,7 @@ class GameScreen:
                 if rect.bottom<0 or rect.top >= SCREEN_HEIGHT or rect.left >= SCREEN_WIDTH or rect.right < 0:
                     continue
                 if self.g.currentRoom[y][x] == "1":
-                    self.windowSurfaceObj.blit(self.brickSurfaceObj, rect)
+                    self.windowSurfaceObj.blit(self.brickSurfObjs[0], rect)
                 if self.g.currentRoom[y][x] == "2":
                     self.windowSurfaceObj.blit(self.skullSurfaceObj, rect)
                 if self.g.currentRoom[y][x] == "3":

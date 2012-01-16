@@ -72,13 +72,12 @@ class Game:
                             "1000000000001111",
                             "3333331111333333"]
 
-        insectList = [Insectoid((ICON_SIZE*4, ICON_SIZE*35)),
-                      Insectoid((ICON_SIZE*12, ICON_SIZE*34))]
-        
-        self.derpBoss = DerpBoss((ICON_SIZE*8,ICON_SIZE*10))
-        
+        monList = [Insectoid((ICON_SIZE*4, ICON_SIZE*35)),
+                   Insectoid((ICON_SIZE*12, ICON_SIZE*34)),
+                   DerpBoss((ICON_SIZE*8,ICON_SIZE*9))]
+                
         self.currentRoom=Room(self.verticalTop1Room+self.verticalMid1Room * 3+self.verticalBottom1Room,
-                              insectList)
+                              monList)
 
         self.player = Player((self.currentRoom.width/2,self.currentRoom.height-2*ICON_SIZE))
 
@@ -108,7 +107,6 @@ class Game:
                             "10000000000000000001",
                             "33333331113333333333"], [])
         
-        self.spriteList = []
                             
         #self.flowers = []
         #self.flowers.append(Flower(random.randint(1,screenSize-2)))
@@ -120,38 +118,31 @@ class Game:
         #self.wateringCounter = 0            #for animating the splashing of water when watering or refilling
 
     def spawnShot(self, rect, dir):
-        self.spriteList.append(PlayerShot(rect,dir))
+        self.currentRoom.playerShotList.append(PlayerShot(rect,dir))
         
         
     def updateObjects(self):
-        for s in self.spriteList:
+        for s in self.currentRoom.playerShotList:
             s.tick()
             if s.rect.right < 0 or s.rect.left>self.currentRoom.width:
-                self.spriteList.remove(s)
+                self.currentRoom.playerShotList.remove(s)
         
-        for i in self.currentRoom.insectoidList:
-            i.tick()
-                
+        for i in self.currentRoom.monsterList:
+            i.tick(self.currentRoom)
+            if not i.isAlive:
+                self.currentRoom.monsterList.remove(i)
 
 
     def checkCollisions(self):
-        for i in self.currentRoom.insectoidList:
+        for i in self.currentRoom.monsterList:
             if i.rect.colliderect(self.player.rect):
                 self.player.hit()
                 self.soundPlayerHurt.play()
             
-            for s in self.spriteList:
+            for s in self.currentRoom.playerShotList:
                 if i.rect.colliderect(s.rect):
                     i.hit()
                     self.soundInsectoidHit.play()
-                    if i.health <= 0:
-                        self.currentRoom.insectoidList.remove(i)
-
-        for s in self.spriteList:    
-            if self.derpBoss.rect.colliderect(s.rect):
-                self.derpBoss.hit()
-                self.soundInsectoidHit.play()
-                #if self.derpBoss.health <= 0:
                     
             
     def update(self):    
