@@ -29,6 +29,7 @@ class BasicSprite:
         self.health -= 1
         if self.health <= 0:
             self.isAlive = False
+            self.health = 0
     
     def bumpedWall(self):
         pass

@@ -1,4 +1,4 @@
-import random
+import random, sys
 import pygame
 from pygame.locals import *
 
@@ -21,7 +21,7 @@ class GameScreen:
         
         # Load sound effects
         self.soundPlayerShoot = pygame.mixer.Sound('playershoot.wav')
-
+        
         self.playerFrame = 0
         self.playerShootFrame = 0
         self.playerAnimationCounter = 0
@@ -53,7 +53,8 @@ class GameScreen:
                                  self.getSurfaceFromIcons(2,0)]
         
         
-        self.sandyShotSurfObj = self.getSurfaceFromIcons(3,1)
+        self.sandyBigShotSurfObj = self.getSurfaceFromIcons(3,1)
+        self.sandySmallShotSurfObj = self.getSurfaceFromIcons(3,2)
         self.skullSurfaceObj = self.getSurfaceFromIcons(4,0)
         self.dirtSurfaceObj = self.getSurfaceFromIcons(0,2)
         self.brickSurfObjs = []
@@ -66,7 +67,7 @@ class GameScreen:
         self.derpBossSurfObj.append(pygame.transform.scale(pygame.image.load('derpboss1.png'),(ICON_SIZE*2,ICON_SIZE*2)))
         
     def animate(self):
-        self.playerAnimationCounter = (self.playerAnimationCounter + 1) % 60
+        self.playerAnimationCounter = (self.playerAnimationCounter + 1) % 600
         if self.g.player.isWalking:
             if (self.playerAnimationCounter % 6 == 0):
                 self.playerFrame = 1 - self.playerFrame
@@ -80,7 +81,7 @@ class GameScreen:
             i.frameNumber = (i.animCounter % (i.numberOfFrames * 4)) /4
         
         
-    def render(self, fpsClock):
+    def render(self):
         offsetx = SCREEN_WIDTH/2 - self.g.player.rect.centerx
         offsety = SCREEN_HEIGHT/2 - self.g.player.rect.centery
         #want to require that
@@ -100,38 +101,42 @@ class GameScreen:
         self.drawObjects()
         self.drawPlayer()
 
-        self.displayScore(fpsClock)
+        self.displayScore()
         
 
     
     def drawObjects(self):
-        for s in self.g.currentRoom.playerShotList:
-            if s.dir == 1:
-                self.windowSurfaceObj.blit(self.sandyShotSurfObj, s.rect.move(self.offset))
-            else:
-                self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShotSurfObj, True, False), s.rect.move(self.offset))
-        
         for i in self.g.currentRoom.monsterList:
             if isinstance(i,Insectoid):
                 self.windowSurfaceObj.blit(self.insectoidSurfObj[i.frameNumber], i.rect.move(self.offset))
             elif isinstance(i,DerpBoss):
                 self.windowSurfaceObj.blit(self.derpBossSurfObj[i.frameNumber], i.rect.move(self.offset))
-            
+
+        for s in self.g.currentRoom.playerShotList:
+            if self.g.player.hasBigWeapon:
+                srf = self.sandyBigShotSurfObj
+            else:
+                srf = self.sandySmallShotSurfObj
+            if s.dir == -1:
+                srf = pygame.transform.flip(srf, True, False)
+            self.windowSurfaceObj.blit(srf, s.rect.move(self.offset))
         
             
     def drawPlayer(self):
         p = self.g.player
+        if p.isShooting and self.playerShootFrame == 1 and self.playerAnimationCounter % 5 == 0:
+            self.soundPlayerShoot.stop()
+            self.soundPlayerShoot.play()
+            self.g.spawnShot(p.rect.copy(), p.dir)
+
+        if (not p.canBeHurt) and (self.playerAnimationCounter % 4 < 2):
+            return
+
         if p.isShooting:
             if p.dir == -1:
                 self.windowSurfaceObj.blit(self.sandyShootSurfObj[self.playerShootFrame], p.rect.move(self.offset))
             else:
                 self.windowSurfaceObj.blit(pygame.transform.flip(self.sandyShootSurfObj[self.playerShootFrame],True,False), p.rect.move(self.offset))
-
-            if self.playerShootFrame == 1 and self.playerAnimationCounter % 5 == 0:
-                self.soundPlayerShoot.stop()
-                self.soundPlayerShoot.play()
-                self.g.spawnShot(p.rect.copy(), p.dir)
-
         else:                
             if p.dir == -1:
                 self.windowSurfaceObj.blit(self.sandyWalkSurfObj[self.playerFrame], p.rect.move(self.offset))
@@ -158,9 +163,7 @@ class GameScreen:
                     self.windowSurfaceObj.blit(self.dirtSurfaceObj, rect)
 
 
-    def displayScore(self, fpsClock):
-        pass
-        
+    def displayScore(self):
         charSize = 16
         #print health at top of screen
         self.windowSurfaceObj.fill(pygame.Color(0,0,0),Rect(0,0,16*ICON_SIZE, ICON_SIZE))
@@ -181,7 +184,7 @@ class GameScreen:
         timeTexty = 0
         self.myFontRenderer.render(self.windowSurfaceObj,(timeTextx,timeTexty),"FPS")
     
-        ms = fpsClock.tick()
+        ms = self.g.msSinceUpdate
         FPS = str(int(round(1000.0/ms)))
         timeWidth = charSize * len(FPS)
         timeLeftx = (16*ICON_SIZE-timeWidth)/2
@@ -245,7 +248,7 @@ class GameScreen:
         waitClock = pygame.time.Clock()
         while isWaiting:
             for event in pygame.event.get():
-                if event.type == QUIT:
+                if event.type == QUIT or event.type==KEYDOWN and event.key==K_ESCAPE:
                     pygame.quit()
                     sys.exit()
                 elif event.type==KEYDOWN:
@@ -256,28 +259,21 @@ class GameScreen:
 
 
     def showGameOverScreen(self):
-        global hiscore
-        delayTime = 3*FPS
         isWaiting = True
         waitClock = pygame.time.Clock()
+        counter = 0
         while isWaiting:
-            #self.updateObjects()
-            self.drawScene(self.player.isOutside)
-            self.player.tick()
-            hiscore = max(hiscore, self.player.score)
+            self.drawScene()
             self.displayScore()
-            delayTime-=1
-            if delayTime<FPS*0.25:
-                msg="GAME OVER!"
-                myRender(self.windowSurfaceObj,((16*ICON_SIZE-len(msg)*charSize)/2, 2*charSize), msg)
-                if delayTime<0:
-                    delayTime=FPS*0.45
+            msg="GAME OVER!"
+            self.myFontRenderer.render(self.windowSurfaceObj,((SCREEN_WIDTH-len(msg)*16)/2, SCREEN_HEIGHT/2-8), msg)
+            counter = min(counter + 1, 120)
             for event in pygame.event.get():
-                if event.type == QUIT:
+                if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
                 elif event.type==KEYDOWN:
-                    if event.key==K_SPACE and delayTime<FPS*0.5:
+                    if event.key==K_SPACE and counter>=120:
                         isWaiting=False
             pygame.display.update()
             waitClock.tick(FPS)

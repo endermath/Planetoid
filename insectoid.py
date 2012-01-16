@@ -7,9 +7,10 @@ from basicsprite import BasicSprite
 
 
 class Insectoid(BasicSprite):
+    hitSound = None 
     def __init__(self, pos):
         r = pygame.Rect(pos,(ICON_SIZE,ICON_SIZE))
-        BasicSprite.__init__(self, r, numberOfFrames=3, health=20, mass=0.6)
+        BasicSprite.__init__(self, r, numberOfFrames=3, health=3, mass=0.6)
         
         self.moveTime = random.randint(100,200)
         self.xspeed = 4.0 * ICON_SIZE / FPS
@@ -27,3 +28,6 @@ class Insectoid(BasicSprite):
             self.moveTime = random.randint(100,200)
             self.yspeed = - 15.0 * ICON_SIZE/FPS            #jump randomly
     
+    def hit(self):
+        BasicSprite.hit(self)
+        Insectoid.hitSound.play()

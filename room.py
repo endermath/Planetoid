@@ -15,7 +15,7 @@ class Room:
         self.wallRectList = []
         for row in range(len(self.array)):
             for column in range(len(self.array[row])):
-                if self.array[row][column] == "1":
+                if self.array[row][column] != "0":
                     r = pygame.Rect((column*ICON_SIZE, row*ICON_SIZE), (ICON_SIZE,ICON_SIZE))
                     self.wallRectList.append(r)
 

@@ -5,6 +5,9 @@ from global_stuff import *
 from fontrenderer import *
 from game import Game
 from gamescreen import GameScreen
+from insectoid import Insectoid
+from player import Player
+from derpboss import DerpBoss
 
 # Global variables common to both title screen and game loop
 hiscore = 0
@@ -19,47 +22,11 @@ windowSurfaceObj = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), FULLSC
 
 pygame.mixer.Sound('background.ogg').play(loops=-1)
 
+# Initialize sounds
+Insectoid.hitSound = pygame.mixer.Sound('insectoidhit.wav')
+DerpBoss.hitSound = pygame.mixer.Sound('insectoidhit.wav')
+Player.hurtSound = pygame.mixer.Sound('playerhurt.wav')
 
-
-#class Flower:
-#    height = 1
-#    waterMax = 3000.0
-#    xpos = 1
-#    def __init__(self,xpos):
-#        self.xpos = xpos
-#        self.height = random.randint(1,4)
-#        self.water = max(400.0, random.gauss(1000,250))
-#        self.growCounter = 0
-#        self.isFinished = False
-#
-#    def get_rect(self):
-#        return Rect(ICON_SIZE*self.xpos, SCREEN_HEIGHT-ICON_SIZE-ICON_SIZE*(self.height+1),
-#                    ICON_SIZE, ICON_SIZE*(self.height+1))
-#        
-#    def grow(self):
-#        if not self.isFinished:
-#            self.water = self.water-self.height/3
-#            if self.water<0:
-#                self.isFinished = True
-#            else:
-#                self.growCounter += self.water/2500.0
-#                if self.growCounter > 200:
-#                    self.growCounter = 0
-#                    self.height += 1
-#                    if self.height > SCREEN_HEIGHT/ICON_SIZE-5:
-#                        self.isFinished = True
-#                        
-#            
-#    def addWater(self,water):
-#        self.water = min(self.water+water, self.waterMax)
-#        
-#    def draw(self):
-#        for s in range(1,self.height+1):
-#            drawIcon(flowerstalkSurfaceObj,self.xpos,15-s)    #draw the stalk
-#        drawIcon(flowerSurfaceObj,self.xpos,15-(self.height+1))  #draw the flower on top
-#        meterRect = Rect(self.xpos*ICON_SIZE, 15*ICON_SIZE+ ICON_SIZE/4, int(round(ICON_SIZE*self.water/self.waterMax)), ICON_SIZE/4)
-#        windowSurfaceObj.fill(pygame.Color(20,20,220), meterRect)
-#        
 
 #class FallingItem:
 #    surf = None
@@ -142,10 +109,9 @@ while True:
     gs = GameScreen(g, windowSurfaceObj)
     gs.showTitleScreen()
     while (not g.isGameOver):        
-        g.update() #fpsClock.tick())
-        gs.render(fpsClock)
-        pygame.display.flip() #update()
-        #fpsClock.tick(FPS)
+        g.update(fpsClock.tick_busy_loop())
+        gs.render()
+        pygame.display.flip()
     gs.showGameOverScreen()
     
 

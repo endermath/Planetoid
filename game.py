@@ -11,11 +11,14 @@ from insectoid import Insectoid
 from derpboss import DerpBoss
 
 class Game:
+    
     def __init__(self):                
         self.isGameOver=False
+        self.msSinceUpdate = 1000
 
-        self.soundInsectoidHit = pygame.mixer.Sound('insectoidhit.wav')
-        self.soundPlayerHurt = pygame.mixer.Sound('playerhurt.wav')
+#        self.soundInsectoidHit = pygame.mixer.Sound('insectoidhit.wav')
+#        self.soundPlayerHurt = pygame.mixer.Sound('playerhurt.wav')
+        self.soundPlayerDeath = pygame.mixer.Sound('playerdeath.wav')
 
         self.verticalTop1Room = \
                            ["1111111111111111",
@@ -74,7 +77,12 @@ class Game:
 
         monList = [Insectoid((ICON_SIZE*4, ICON_SIZE*35)),
                    Insectoid((ICON_SIZE*12, ICON_SIZE*34)),
-                   DerpBoss((ICON_SIZE*8,ICON_SIZE*9))]
+                   Insectoid((ICON_SIZE*4, ICON_SIZE*49)),
+                   Insectoid((ICON_SIZE*12, ICON_SIZE*47)),
+                   Insectoid((ICON_SIZE*4, ICON_SIZE*65)),
+                   Insectoid((ICON_SIZE*12, ICON_SIZE*67)),
+                   DerpBoss((ICON_SIZE*8,ICON_SIZE*9)),
+                   DerpBoss((ICON_SIZE*8,ICON_SIZE*50))]
                 
         self.currentRoom=Room(self.verticalTop1Room+self.verticalMid1Room * 3+self.verticalBottom1Room,
                               monList)
@@ -137,21 +145,26 @@ class Game:
         for i in self.currentRoom.monsterList:
             if i.rect.colliderect(self.player.rect):
                 self.player.hit()
-                self.soundPlayerHurt.play()
             
             for s in self.currentRoom.playerShotList:
                 if i.rect.colliderect(s.rect):
                     i.hit()
-                    self.soundInsectoidHit.play()
+                    self.currentRoom.playerShotList.remove(s)
                     
             
-    def update(self):    
+    def update(self, msSinceUpdate):    
+        self.msSinceUpdate = msSinceUpdate
         self.updateObjects()
         self.player.tick(self.currentRoom)
 
         self.checkCollisions()
 
         # take care of events
+        if not self.player.isAlive:
+            self.isGameOver = True
+            self.soundPlayerDeath.play()
+
+            
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()

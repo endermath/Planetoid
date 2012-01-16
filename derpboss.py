@@ -6,9 +6,10 @@ from global_stuff import *
 from basicsprite import BasicSprite
 
 class DerpBoss(BasicSprite):
+    hitSound = None
     def __init__(self, pos):
         r = pygame.Rect(pos,(2*ICON_SIZE,2*ICON_SIZE))
-        BasicSprite.__init__(self, r, health=150, mass=2.0, numberOfFrames=2)
+        BasicSprite.__init__(self, r, health=15, mass=2.0, numberOfFrames=2)
         
         self.waitTime = random.randint(300,500)
     
@@ -16,7 +17,11 @@ class DerpBoss(BasicSprite):
         self.xspeed = - self.xspeed
     
     def bumpedRoof(self):
-        self.yspeed = - self.yspeed
+        self.yspeed = 0 #- self.yspeed
+        
+    def hit(self):
+        BasicSprite.hit(self)
+        DerpBoss.hitSound.play()
         
     def tick(self, room):
         BasicSprite.tick(self, room)
